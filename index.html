@@ -111,6 +111,17 @@
                 localStorage.setItem('cad_glass_quotes', JSON.stringify(updatedQuotes));
                 alert("Quotation Saved Successfully!");
             };
+            const autoSaveQuote = () => {
+                try {
+                    if (partitions.length === 0) return;
+                    const fp = JSON.stringify(partitions);
+                    if (savedQuotes.length > 0 && savedQuotes[0].fp === fp) return;
+                    const quoteToSave = { id: Date.now().toString(), status: 'Pending', customer, partitions: JSON.parse(JSON.stringify(partitions)), financials, timestamp: new Date().toLocaleString(), fp: fp };
+                    const updatedQuotes = [quoteToSave, ...savedQuotes];
+                    setSavedQuotes(updatedQuotes);
+                    localStorage.setItem('cad_glass_quotes', JSON.stringify(updatedQuotes));
+                } catch(e) {}
+            };
 
             const updateQuoteStatus = (id, newStatus) => {
                 const updatedQuotes = savedQuotes.map(q => q.id === id ? { ...q, status: newStatus } : q);
@@ -438,7 +449,7 @@
 
         // --- 2. PROFESSIONAL & COLORFUL INVOICE COMPONENT ---
         function InvoicePreview({ company, customer, partitions, rates, financials, subTotal, taxAmount, grandTotal, balance, saveCurrentQuote, startNewQuote, quoteId }) {
-            const printBill = () => window.print();
+            const printBill = () => { autoSaveQuote(); window.print(); };
 
             let totalGlassCost = 0; let totalProfileCost = 0; let totalHardwareCost = 0; let totalGlassPaperCost = 0;
 
